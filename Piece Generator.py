@@ -1,4 +1,5 @@
 import random
+from PIL import Image
 
 def generate_random_walk(shape, max_piece_size, start_point):
     """
@@ -84,16 +85,41 @@ def print_combined_grid(grid):
                 print(cell, end=" ")
         print()
 
+def convert_image_to_coordinates(image_path, max_grid_size):
+    # Load the image
+    image = Image.open(image_path)
+    
+    # Resize the image to the desired grid size
+    image = image.resize((max_grid_size, max_grid_size))
+    
+    # Convert the image to grayscale
+    image = image.convert('L')
+    
+    # Threshold the image to convert it to black and white
+    threshold = 128
+    image = image.point(lambda p: p > threshold and 255)
+    
+    # Extract coordinates of black pixels
+    coordinates = set()
+    for y in range(max_grid_size):
+        for x in range(max_grid_size):
+            if image.getpixel((x, y)) == 0:  # Black pixel
+                coordinates.add((x, y))
+    
+    return coordinates
+
 def main():
-    max_piece_size = 4  # Maximum size of a Tetris-like piece
-    max_grid_size = 20  # Maximum size of square grid
+    max_piece_size = 6  # Maximum size of a Tetris-like piece
+    max_grid_size = 13  # Maximum size of square grid
 
     grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-    shape = {
-        (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
-        (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
-    }
-
+    # shape = {
+    #     (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
+    #     (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
+    # }
+    image_path = 'C:/Users/brusha/Downloads/GameImageTest.jpg'
+    shape = convert_image_to_coordinates(image_path, max_grid_size)
+    print(shape)
     print("Original Shape:")
     draw_grid(grid, shape, "#")
 
