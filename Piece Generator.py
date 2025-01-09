@@ -29,11 +29,37 @@ def generate_random_walk(shape, max_piece_size, start_point):
 
     return piece
 
-def split_shape_into_pieces(shape, max_piece_size):
+def merge_small_pieces(pieces, min_piece_size):
+    """
+    Merges small pieces into larger ones if they share an edge.
+    """
+    merged_pieces = []
+    while pieces:
+        piece = pieces.pop()
+        if len(piece) < min_piece_size:
+            neighbors = []
+            for other_piece in pieces:
+                if any(
+                    (x + dx, y + dy) in other_piece
+                    for x, y in piece
+                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                ):
+                    neighbors.append(other_piece)
+            if neighbors:
+                selected_piece = random.choice(neighbors)
+                selected_piece.update(piece)
+            else:
+                merged_pieces.append(piece)
+        else:
+            merged_pieces.append(piece)
+    return merged_pieces
+
+def split_shape_into_pieces(shape, max_piece_size, min_piece_size=3):
     """
     Splits the shape into Tetris-like pieces using a random walking algorithm.
     If a random walk gets stuck, a new random start point is chosen.
     The process ends once the entire shape is divided into non-overlapping pieces.
+    Ensures that pieces are not smaller than the minimum piece size.
     """
     shape = set(shape)
     pieces = []
@@ -42,13 +68,14 @@ def split_shape_into_pieces(shape, max_piece_size):
         start_point = min(shape)  # Start from the top-left most point
         piece = generate_random_walk(shape, max_piece_size, start_point)
 
-        if not piece:  # If the walk didn't form a piece, choose a new random point
+        if not piece or len(piece) < min_piece_size:  # If the walk didn't form a piece or is too small, choose a new random point
             start_point = random.choice(list(shape))
             piece = generate_random_walk(shape, max_piece_size, start_point)
 
         pieces.append(piece)
         shape -= piece  # Remove the covered points from the shape
 
+    pieces = merge_small_pieces(pieces, min_piece_size)
     return pieces
 
 def draw_grid(grid, shape, piece_number):
@@ -109,8 +136,9 @@ def convert_image_to_coordinates(image_path, max_grid_size):
     return coordinates
 
 def main():
-    max_piece_size = 6  # Maximum size of a Tetris-like piece
-    max_grid_size = 13  # Maximum size of square grid
+    max_piece_size = 5  # Maximum size of a Tetris-like piece (+1) Must be 5 or above
+    min_piece_size = 3  # Maximum size of a Tetris-like piece (+1) 
+    max_grid_size = 14  # Maximum size of square grid
 
     grid = [[0] * max_grid_size for _ in range(max_grid_size)]
     # shape = {
