@@ -50,37 +50,64 @@ def split_shape_into_pieces(shape, max_piece_size):
 
     return pieces
 
-def draw_grid(grid, shape):
+def draw_grid(grid, shape, piece_number):
     """
     Prints the grid with the given shape.
     """
     for i, row in enumerate(grid):
         for j, cell in enumerate(row):
             if (i, j) in shape:
-                print("#", end=" ")
+                print(piece_number, end=" ")
             else:
                 print(".", end=" ")
         print()
 
+def combine_pieces(grid, pieces):
+    """
+    Combines all pieces into a single grid.
+    """
+    combined_grid = [[0] * len(grid[0]) for _ in range(len(grid))]
+    for piece_number, piece in enumerate(pieces, start=1):
+        for (i, j) in piece:
+            combined_grid[i][j] = piece_number
+    return combined_grid
+
+def print_combined_grid(grid):
+    """
+    Prints the combined grid with all pieces.
+    """
+    for row in grid:
+        for cell in row:
+            if cell == 0:
+                print(".", end=" ")
+            else:
+                print(cell, end=" ")
+        print()
+
 def main():
-    # Example shape (can be customized)
-    grid = [[0] * 10 for _ in range(10)]
+    max_piece_size = 4  # Maximum size of a Tetris-like piece
+    max_grid_size = 20  # Maximum size of square grid
+
+    grid = [[0] * max_grid_size for _ in range(max_grid_size)]
     shape = {
         (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
-        (3, 1), (3, 2), (3, 3), (4, 4), (4, 5), (5, 4), (5, 5)
+        (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
     }
 
     print("Original Shape:")
-    draw_grid(grid, shape)
+    draw_grid(grid, shape, "#")
 
-    max_piece_size = 4  # Maximum size of a Tetris-like piece
     pieces = split_shape_into_pieces(shape, max_piece_size)
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
         print(f"Piece {index}:")
-        draw_grid(grid, piece)
+        draw_grid(grid, piece, index)
         print()
+
+    combined_grid = combine_pieces(grid, pieces)
+    print("\nCombined Grid with All Pieces:")
+    print_combined_grid(combined_grid)
 
 if __name__ == "__main__":
     main()
