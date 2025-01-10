@@ -1,5 +1,6 @@
 import random
 from PIL import Image
+from edge_detection import extract_shape
 
 def generate_random_walk(shape, max_piece_size, start_point):
     """
@@ -157,8 +158,9 @@ def main():
     #     (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
     #     (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
     # }
-    image_path = 'C:/Users/brusha/Downloads/GameImageTest3.jpg'
-    shape = convert_image_to_coordinates(image_path, max_grid_size)
+    image_path = 'C:/Users/brusha/Downloads/GameImageTestCat.jpg'
+    shape = extract_shape(image_path)
+    shape = convert_image_to_coordinates(shape, max_grid_size)
     print(shape)
     print("Original Shape:")
     draw_grid(grid, shape, "#")
