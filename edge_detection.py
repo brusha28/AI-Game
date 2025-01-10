@@ -56,6 +56,3 @@ def extract_shape(image_path):
     result = cv2.bitwise_not(result)
 
     return result
-
-result = extract_shape('images/image4.jpg')
-cv2.imwrite('result.jpg', result)
