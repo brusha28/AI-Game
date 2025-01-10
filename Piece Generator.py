@@ -17,19 +17,31 @@ def generate_random_walk(shape, max_piece_size, start_point):
         ]
         random.shuffle(neighbors)
 
-        stuck = True
-        for neighbor in neighbors:
-            if neighbor in shape and neighbor not in piece:
-                piece.add(neighbor)
-                stuck = False
-                break
+        while True:
+            stuck = True
+            for current in list(piece):
+                neighbors = [
+                    (current[0] + dx, current[1] + dy)
+                    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                ]
+                random.shuffle(neighbors)
 
-        if stuck:
+                for neighbor in neighbors:
+                    if neighbor in shape and neighbor not in piece:
+                        piece.add(neighbor)
+                        stuck = False
+                        break
+                if not stuck:
+                    break
+
+            if stuck or len(piece) >= max_piece_size:
+                break
+        if stuck or len(piece) >= max_piece_size:
             break
 
     return piece
 
-def merge_small_pieces(pieces, min_piece_size):
+def merge_small_pieces(pieces, min_piece_size, max_piece_size):
     """
     Merges small pieces into larger ones if they share an edge.
     """
@@ -43,7 +55,7 @@ def merge_small_pieces(pieces, min_piece_size):
                     (x + dx, y + dy) in other_piece
                     for x, y in piece
                     for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                ):
+                ) and len(other_piece) <= max_piece_size:
                     neighbors.append(other_piece)
             if neighbors:
                 selected_piece = random.choice(neighbors)
@@ -54,7 +66,7 @@ def merge_small_pieces(pieces, min_piece_size):
             merged_pieces.append(piece)
     return merged_pieces
 
-def split_shape_into_pieces(shape, max_piece_size, min_piece_size=3):
+def split_shape_into_pieces(shape, max_piece_size, min_piece_size):
     """
     Splits the shape into Tetris-like pieces using a random walking algorithm.
     If a random walk gets stuck, a new random start point is chosen.
@@ -75,7 +87,7 @@ def split_shape_into_pieces(shape, max_piece_size, min_piece_size=3):
         pieces.append(piece)
         shape -= piece  # Remove the covered points from the shape
 
-    pieces = merge_small_pieces(pieces, min_piece_size)
+    pieces = merge_small_pieces(pieces, min_piece_size, max_piece_size)
     return pieces
 
 def draw_grid(grid, shape, piece_number):
@@ -123,7 +135,7 @@ def convert_image_to_coordinates(image_path, max_grid_size):
     image = image.convert('L')
     
     # Threshold the image to convert it to black and white
-    threshold = 128
+    threshold = 200
     image = image.point(lambda p: p > threshold and 255)
     
     # Extract coordinates of black pixels
@@ -131,27 +143,27 @@ def convert_image_to_coordinates(image_path, max_grid_size):
     for y in range(max_grid_size):
         for x in range(max_grid_size):
             if image.getpixel((x, y)) == 0:  # Black pixel
-                coordinates.add((x, y))
+                coordinates.add((y, x))
     
     return coordinates
 
 def main():
     max_piece_size = 5  # Maximum size of a Tetris-like piece (+1) Must be 5 or above
     min_piece_size = 3  # Maximum size of a Tetris-like piece (+1) 
-    max_grid_size = 14  # Maximum size of square grid
+    max_grid_size = 18  # Maximum size of square grid
 
     grid = [[0] * max_grid_size for _ in range(max_grid_size)]
     # shape = {
     #     (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
     #     (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
     # }
-    image_path = 'C:/Users/brusha/Downloads/GameImageTest.jpg'
+    image_path = 'C:/Users/brusha/Downloads/GameImageTest3.jpg'
     shape = convert_image_to_coordinates(image_path, max_grid_size)
     print(shape)
     print("Original Shape:")
     draw_grid(grid, shape, "#")
 
-    pieces = split_shape_into_pieces(shape, max_piece_size)
+    pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
