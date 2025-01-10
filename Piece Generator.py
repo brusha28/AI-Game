@@ -148,6 +148,28 @@ def convert_image_to_coordinates(image, max_grid_size):
     
     return coordinates
 
+def merge_single_pieces(pieces):
+    merged_pieces = []
+    single_pieces = [piece for piece in pieces if len(piece) == 1]
+    other_pieces = [piece for piece in pieces if len(piece) > 1]
+
+    for single_piece in single_pieces:
+        single_coord = next(iter(single_piece))
+        merged = False
+        for piece in other_pieces:
+            for coord in piece:
+                if (abs(coord[0] - single_coord[0]) == 1 and coord[1] == single_coord[1]) or \
+                   (abs(coord[1] - single_coord[1]) == 1 and coord[0] == single_coord[0]):
+                    piece.add(single_coord)
+                    merged = True
+                    break
+            if merged:
+                break
+        if not merged:
+            merged_pieces.append(single_piece)
+
+    return other_pieces + merged_pieces
+
 def main():
     max_piece_size = 5  # Maximum size of a Tetris-like piece (+1) Must be 5 or above
     min_piece_size = 3  # Maximum size of a Tetris-like piece (+1) 
@@ -162,6 +184,7 @@ def main():
     draw_grid(grid, shape, "#")
 
     pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
+    pieces = merge_single_pieces(pieces)
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
