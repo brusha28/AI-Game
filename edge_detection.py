@@ -1,9 +1,6 @@
 import os
 import cv2
 import numpy as np
-import torch
-import torchvision
-from torchvision import transforms as T
 import matplotlib.pyplot as plt
 from rembg import remove
 
