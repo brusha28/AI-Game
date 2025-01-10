@@ -158,7 +158,7 @@ def main():
     #     (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
     #     (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
     # }
-    image_path = 'C:/Users/brusha/Downloads/GameImageTestCat.jpg'
+    image_path = 'images/image2.jpg'
     shape = extract_shape(image_path)
     shape = convert_image_to_coordinates(shape, max_grid_size)
     print(shape)

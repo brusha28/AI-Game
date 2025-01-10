@@ -1,7 +1,6 @@
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from rembg import remove
 
 def extract_shape(image_path):
@@ -55,21 +54,6 @@ def extract_shape(image_path):
         result = square_result
 
     result = cv2.bitwise_not(result)
-
-    # Display the original image, the background removed image, and the filled edges
-    plt.figure(figsize=(15, 5))
-
-    plt.subplot(1, 2, 1)
-    plt.title('Original Image')
-    plt.imshow(image_rgb)
-    plt.axis('off')
-
-    plt.subplot(1, 2, 2)
-    plt.title('Background Removed')
-    plt.imshow(result, cmap='gray')
-    plt.axis('off')
-
-    plt.show()
 
     return result
 
