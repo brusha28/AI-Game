@@ -173,28 +173,34 @@ def merge_single_pieces(pieces):
 def main():
     max_piece_size = 5  # Maximum size of a Tetris-like piece (+1) Must be 5 or above
     min_piece_size = 3  # Maximum size of a Tetris-like piece (+1) 
-    max_grid_size = 18  # Maximum size of square grid
+    max_grid_size = 20  # Maximum size of square grid
 
-    grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-    image_path = 'images/image4.jpg'
-    img = extract_shape(image_path)
-    shape = convert_image_to_coordinates(img, max_grid_size)
-    print(shape)
-    print("Original Shape:")
-    draw_grid(grid, shape, "#")
+    while max_grid_size >= min_piece_size:
+        grid = [[0] * max_grid_size for _ in range(max_grid_size)]
+        image_path = 'images/image4.jpg'
+        img = extract_shape(image_path)
+        shape = convert_image_to_coordinates(img, max_grid_size)
+        print(shape)
+        print("Original Shape:")
+        draw_grid(grid, shape, "#")
 
-    pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
-    pieces = merge_single_pieces(pieces)
+        pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
+        pieces = merge_single_pieces(pieces)
+
+        if len(pieces) <= 12:
+            break
+        else:
+            max_grid_size -= 1
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
         print(f"Piece {index}:")
         draw_grid(grid, piece, index)
-        print()
 
     combined_grid = combine_pieces(grid, pieces)
     print("\nCombined Grid withAll Pieces:")
     print_combined_grid(combined_grid)
+    print(len(pieces))
 
 if __name__ == "__main__":
     main()
