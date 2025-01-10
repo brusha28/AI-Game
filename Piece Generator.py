@@ -1,6 +1,7 @@
 import random
 from PIL import Image
 from edge_detection import extract_shape
+import numpy as np
 
 def generate_random_walk(shape, max_piece_size, start_point):
     """
@@ -125,14 +126,13 @@ def print_combined_grid(grid):
                 print(cell, end=" ")
         print()
 
-def convert_image_to_coordinates(image_path, max_grid_size):
-    # Load the image
-    image = Image.open(image_path)
+def convert_image_to_coordinates(image, max_grid_size):
+    if isinstance(image, np.ndarray):
+        # Convert numpy array to PIL Image
+        image = Image.fromarray(image)
     
-    # Resize the image to the desired grid size
+    # Resize the image
     image = image.resize((max_grid_size, max_grid_size))
-    
-    # Convert the image to grayscale
     image = image.convert('L')
     
     # Threshold the image to convert it to black and white
@@ -154,13 +154,9 @@ def main():
     max_grid_size = 18  # Maximum size of square grid
 
     grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-    # shape = {
-    #     (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3),
-    #     (3, 1), (3, 2), (3, 3), (3, 4), (4, 4), (4, 5), (5, 4), (5, 5), (6, 5), (6, 6),
-    # }
-    image_path = 'images/image2.jpg'
-    shape = extract_shape(image_path)
-    shape = convert_image_to_coordinates(shape, max_grid_size)
+    image_path = 'images/image4.jpg'
+    img = extract_shape(image_path)
+    shape = convert_image_to_coordinates(img, max_grid_size)
     print(shape)
     print("Original Shape:")
     draw_grid(grid, shape, "#")
@@ -174,7 +170,7 @@ def main():
         print()
 
     combined_grid = combine_pieces(grid, pieces)
-    print("\nCombined Grid with All Pieces:")
+    print("\nCombined Grid withAll Pieces:")
     print_combined_grid(combined_grid)
 
 if __name__ == "__main__":
