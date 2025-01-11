@@ -4,7 +4,7 @@ import pyautogui
 from pygame.locals import *
 
 class Tiles:
-    # main method for initializing different variables
+    # main method for initializing different variable
     def __init__(self, screen, start_position_x, 
                  start_position_y, num, mat_pos_x, mat_pos_y):
         self.color = (0, 255, 0)
