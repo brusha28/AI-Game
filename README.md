@@ -8,3 +8,4 @@ AI Game
 - pillow = 11.0.0
 - rembg = 2.0.53
 - opencv = 4.10.0
+- pygame = 2.2.0
