@@ -7,7 +7,7 @@ pg.display.set_caption("Tangrams")
 COLOR_MAP = (
     (),
     (0, 0, 0),
-    (255, 255, 255),
+    (213, 186, 182),
     (0, 255, 255),
     (0, 0, 255),
     (255, 0, 255),
@@ -41,4 +41,4 @@ CURR_PIECE_Y_OFFSET = 540
 
 LINE_THICKNESS = 5
 
-BACKGROUND = pg.image.load("assets/background.jpg")
+BACKGROUND = pg.image.load("assets/white_background.png")

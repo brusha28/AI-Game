@@ -54,7 +54,7 @@ class TangramGame(TangramSolver):
 
     @staticmethod
     def draw_title():
-        title_word = TITLE_FONT.render("TANGRAMS", True, (0, 0, 0))
+        title_word = TITLE_FONT.render("Block Puzzle", True, (0, 0, 0))
         title_rect = title_word.get_rect()
         title_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 10.2)
         SCREEN.blit(title_word, title_rect)
