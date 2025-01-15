@@ -3,9 +3,7 @@
 class TangramSolver:
 
     def __init__(self):
-
         self.pieces = (
-
             [],
 
             [[1, 1],
@@ -57,7 +55,13 @@ class TangramSolver:
 
             [[13, 13, 0],
              [0, 13, 0],
-             [0, 13, 13]]
+             [0, 13, 13]],
+
+            [[14, 0], 
+             [14, 14], 
+             [14, 14], 
+             [14, 0]]
+               
         )
 
         self.color_map = (
@@ -77,7 +81,7 @@ class TangramSolver:
             "💀"
         )
 
-        self.board = [[0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(8)]
+        self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
         self.piece_positions = self.gen_piece_positions(self.pieces)
 
         # only generate one position for piece 10 to avoid duplicating board positions

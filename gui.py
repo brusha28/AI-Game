@@ -1,7 +1,6 @@
 from tangram import TangramSolver
 from setup import *
 import sys
-#hello
 
 class TangramGame(TangramSolver):
 
@@ -11,9 +10,9 @@ class TangramGame(TangramSolver):
 
         self.solution = []
 
-        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(8)]
+        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
 
-        self.unused_pieces = [num for num in range(1, 14)]
+        self.unused_pieces = [num for num in range(1, len(self.pieces))]
 
         self.current_piece = self.pieces[random.choice(self.unused_pieces)]
 
@@ -56,7 +55,7 @@ class TangramGame(TangramSolver):
     def draw_title():
         title_word = TITLE_FONT.render("Block Puzzle", True, (0, 0, 0))
         title_rect = title_word.get_rect()
-        title_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 10.2)
+        title_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 15)
         SCREEN.blit(title_word, title_rect)
 
     @staticmethod
@@ -69,7 +68,7 @@ class TangramGame(TangramSolver):
                                                                   SQUARE_HEIGHT])
 
     def draw_buffer(self):
-        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(8)]
+        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
         mouse_x, mouse_y = pg.mouse.get_pos()
         row = (mouse_y - BOARD_Y_OFFSET) // SQUARE_HEIGHT
         col = (mouse_x - BOARD_X_OFFSET) // SQUARE_WIDTH
@@ -80,7 +79,7 @@ class TangramGame(TangramSolver):
                 self.board_buffer, _ = self.add_piece(self.board_buffer, self.current_piece, row, col, False)
 
     def draw_board_pieces(self, board, x_offset, y_offset):
-        piece_positions = self.get_piece_positions(board)
+        piece_positions = self.get_piece_positions(board, len(self.pieces))
         for piece_coord in piece_positions.values():
             self.draw_piece(piece_coord, board, x_offset, y_offset)
 
@@ -137,8 +136,9 @@ class TangramGame(TangramSolver):
     # Methods that access or modify the board state
     #####################################################################
     @staticmethod
-    def get_piece_positions(board):
-        piece_loc_dict = {num: [] for num in range(1, 14)}
+    def get_piece_positions(board, num_pieces):
+        print(num_pieces)
+        piece_loc_dict = {num: [] for num in range(1, num_pieces)}
         for i, row in enumerate(board):
             for j, val in enumerate(row):
                 if val:
@@ -269,7 +269,7 @@ class TangramGame(TangramSolver):
         self.solve_board(self.board, unused_pieces)
         if self.solution:
             self.board = self.solution
-            piece_positions = self.get_piece_positions(self.solution)
+            piece_positions = self.get_piece_positions(self.solution, len(self.pieces) - 1)
             for piece_coord in piece_positions.values():
                 self.draw_piece(piece_coord, self.board, BOARD_X_OFFSET, BOARD_Y_OFFSET)
                 self.draw_board_outline()
