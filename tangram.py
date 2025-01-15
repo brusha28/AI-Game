@@ -6,6 +6,8 @@ class TangramSolver:
         self.generated_pieces, self.generated_shape = game_generator()
         self.pieces = [[], *self.generated_pieces]
 
+        print(self.generated_shape)
+
         self.color_map = (
             "⬛",
             "⬜",
@@ -25,11 +27,6 @@ class TangramSolver:
 
         self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
         self.piece_positions = self.gen_piece_positions(self.pieces)
-
-        # only generate one position for piece 10 to avoid duplicating board positions
-        # for i, positions in enumerate(self.piece_positions):
-        #     if i == 9:
-        #         self.piece_positions[i] = [positions[0]]
 
         self.iterations = 0
         self.solutions = []
