@@ -9,7 +9,7 @@ class TangramSolver:
             [],
 
             [[1, 1],
-             [1, 1]],
+             [1, 1]], 
 
             [[2, 0, 0],
              [2, 0, 0],
@@ -81,9 +81,9 @@ class TangramSolver:
         self.piece_positions = self.gen_piece_positions(self.pieces)
 
         # only generate one position for piece 10 to avoid duplicating board positions
-        for i, positions in enumerate(self.piece_positions):
-            if i == 9:
-                self.piece_positions[i] = [positions[0]]
+        # for i, positions in enumerate(self.piece_positions):
+        #     if i == 9:
+        #         self.piece_positions[i] = [positions[0]]
 
         self.iterations = 0
         self.solutions = []
