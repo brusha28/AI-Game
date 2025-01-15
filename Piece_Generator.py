@@ -187,6 +187,25 @@ def save_pieces_in_uniform_format(pieces):
         formatted_pieces.append(trimmed_array.tolist())
     return formatted_pieces
 
+def random_rotate_flip_pieces(formatted_pieces):
+    def rotate_piece(piece):
+        rotations = random.randint(0, 3)  # 0 to 3 rotations (0, 90, 180, 270 degrees)
+        return np.rot90(piece, rotations)
+
+    def flip_piece(piece):
+        if random.choice([True, False]):
+            piece = np.flip(piece)
+        return piece
+
+    rotated_flipped_pieces = []
+    for piece in formatted_pieces:
+        piece_array = np.array(piece)
+        piece_array = rotate_piece(piece_array)
+        piece_array = flip_piece(piece_array)
+        rotated_flipped_pieces.append(piece_array.tolist())
+
+    return rotated_flipped_pieces
+
 def game_generator():
     max_piece_size = 5  # Maximum size of a Tetris-like piece (+2) Must be 5 or above
     min_piece_size = 3  # Minimum size of a Tetris-like piece  
@@ -194,7 +213,7 @@ def game_generator():
 
     while max_grid_size >= min_piece_size:
         grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-        image_path = 'images/image1.jpg'
+        image_path = 'images/image5.png'
         img = extract_shape(image_path)
         shape = convert_image_to_coordinates(img, max_grid_size)
         
@@ -206,7 +225,8 @@ def game_generator():
         pieces = merge_single_pieces(pieces)
 
         if len(pieces) <= 14:
-            formatted_pieces = save_pieces_in_uniform_format(pieces)
+            formatted_pieces_test = save_pieces_in_uniform_format(pieces)
+            formatted_pieces = random_rotate_flip_pieces(formatted_pieces_test)
             for piece in formatted_pieces:
                 print(piece)
             break
