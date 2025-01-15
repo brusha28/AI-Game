@@ -198,22 +198,17 @@ def game_generator():
         img = extract_shape(image_path)
         shape = convert_image_to_coordinates(img, max_grid_size)
         
-        print(shape)
-        print("Original Shape:")
-        draw_grid(grid, shape, "#")
-
         pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
         pieces = merge_single_pieces(pieces)
 
         if len(pieces) <= 14:
             formatted_pieces = save_pieces_in_uniform_format(pieces)
-            for piece in formatted_pieces:
-                print(piece)
             break
         else:
             max_grid_size -= 1
 
-        print(pieces)
+    print("Original Shape:")
+    draw_grid(grid, shape, "#")
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
@@ -223,8 +218,6 @@ def game_generator():
     combined_grid = combine_pieces(grid, pieces)
     print("\nCombined Grid with All Pieces:")
     print_combined_grid(combined_grid)
-    print(len(pieces))
-    print(pieces)
 
     return formatted_pieces, shape
 
