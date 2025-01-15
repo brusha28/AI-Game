@@ -213,6 +213,8 @@ def game_generator():
         else:
             max_grid_size -= 1
 
+        print(pieces)
+
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
         print(f"Piece {index}:")

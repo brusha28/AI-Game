@@ -3,8 +3,67 @@ from Piece_Generator import game_generator
 class TangramSolver:
 
     def __init__(self):
+<<<<<<< HEAD
         self.generated_pieces, self.generated_shape = game_generator()
         self.pieces = [[], *self.generated_pieces]
+=======
+
+        self.pieces = (
+
+            [],
+
+            [[1, 1],
+             [1, 1]], 
+
+            [[2, 0, 0],
+             [2, 0, 0],
+             [2, 2, 2]],
+
+            [[0, 3, 0],
+             [3, 3, 3],
+             [0, 3, 0]],
+
+            [[4, 4, 4, 4, 4]],
+
+            [[5, 0],
+             [5, 0],
+             [5, 0],
+             [5, 5]],
+
+            [[6, 6, 0],
+             [0, 6, 6],
+             [0, 0, 6]],
+
+            [[7, 7, 7],
+             [0, 7, 0],
+             [0, 7, 0]],
+
+            [[8, 8, 8],
+             [8, 0, 8]],
+
+            [[9, 0],
+             [9, 9],
+             [9, 9]],
+
+            [[10, 10, 0],
+             [0, 10, 10],
+             [0, 10, 0]],
+
+            [[11, 0],
+             [11, 11],
+             [0, 11],
+             [0, 11]],
+
+            [[12, 0],
+             [12, 12],
+             [12, 0],
+             [12, 0]],
+
+            [[13, 13, 0],
+             [0, 13, 0],
+             [0, 13, 13]]
+        )
+>>>>>>> c1e633a92f85652975e4dd70b370b540e9510802
 
         self.color_map = (
             "⬛",
@@ -27,9 +86,9 @@ class TangramSolver:
         self.piece_positions = self.gen_piece_positions(self.pieces)
 
         # only generate one position for piece 10 to avoid duplicating board positions
-        for i, positions in enumerate(self.piece_positions):
-            if i == 9:
-                self.piece_positions[i] = [positions[0]]
+        # for i, positions in enumerate(self.piece_positions):
+        #     if i == 9:
+        #         self.piece_positions[i] = [positions[0]]
 
         self.iterations = 0
         self.solutions = []
