@@ -140,7 +140,6 @@ class TangramGame(TangramSolver):
     #####################################################################
     @staticmethod
     def get_piece_positions(board, num_pieces):
-        print(num_pieces)
         piece_loc_dict = {num: [] for num in range(1, num_pieces)}
         for i, row in enumerate(board):
             for j, val in enumerate(row):
