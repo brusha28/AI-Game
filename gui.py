@@ -1,7 +1,6 @@
 from tangram import TangramSolver
 from setup import *
 import sys
-#hello
 
 class TangramGame(TangramSolver):
 
@@ -14,6 +13,9 @@ class TangramGame(TangramSolver):
         self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(8)]
 
         self.unused_pieces = [num for num in range(1, 14)]
+
+        #self.generated_pieces, self.generated_shape = game_generator()
+        #self.pieces = [[], *self.generated_pieces]
 
         self.current_piece = self.pieces[random.choice(self.unused_pieces)]
 
