@@ -14,6 +14,9 @@ class TangramGame(TangramSolver):
 
         self.unused_pieces = [num for num in range(1, len(self.pieces))]
 
+        #self.generated_pieces, self.generated_shape = game_generator()
+        #self.pieces = [[], *self.generated_pieces]
+
         self.current_piece = self.pieces[random.choice(self.unused_pieces)]
 
         self.piece_idx_pointer = 0

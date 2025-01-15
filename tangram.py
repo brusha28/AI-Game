@@ -1,8 +1,11 @@
-
+from Piece_Generator import game_generator
 
 class TangramSolver:
 
     def __init__(self):
+        self.generated_pieces, self.generated_shape = game_generator()
+        self.pieces = [[], *self.generated_pieces]
+
         self.pieces = (
             [],
 
@@ -55,13 +58,7 @@ class TangramSolver:
 
             [[13, 13, 0],
              [0, 13, 0],
-             [0, 13, 13]],
-
-            [[14, 0], 
-             [14, 14], 
-             [14, 14], 
-             [14, 0]]
-               
+             [0, 13, 13]]
         )
 
         self.color_map = (

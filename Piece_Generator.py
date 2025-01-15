@@ -170,9 +170,26 @@ def merge_single_pieces(pieces):
 
     return other_pieces + merged_pieces
 
-def main():
-    max_piece_size = 5  # Maximum size of a Tetris-like piece (+1) Must be 5 or above
-    min_piece_size = 3  # Maximum size of a Tetris-like piece (+1) 
+def save_pieces_in_uniform_format(pieces):
+    formatted_pieces = []
+    for index, piece in enumerate(pieces, start=1):
+        max_row = max(x for x, y in piece)
+        max_col = max(y for x, y in piece)
+        piece_array = np.zeros((max_row + 1, max_col + 1), dtype=int)
+        for x, y in piece:
+            piece_array[x, y] = index
+        
+        # Remove rows and columns that are completely zero
+        non_zero_rows = np.any(piece_array, axis=1)
+        non_zero_cols = np.any(piece_array, axis=0)
+        trimmed_array = piece_array[non_zero_rows][:, non_zero_cols]
+        
+        formatted_pieces.append(trimmed_array.tolist())
+    return formatted_pieces
+
+def game_generator():
+    max_piece_size = 5  # Maximum size of a Tetris-like piece (+2) Must be 5 or above
+    min_piece_size = 3  # Minimum size of a Tetris-like piece  
     max_grid_size = 20  # Maximum size of square grid
 
     while max_grid_size >= min_piece_size:
@@ -188,7 +205,10 @@ def main():
         pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
         pieces = merge_single_pieces(pieces)
 
-        if len(pieces) <= 12:
+        if len(pieces) <= 14:
+            formatted_pieces = save_pieces_in_uniform_format(pieces)
+            for piece in formatted_pieces:
+                print(piece)
             break
         else:
             max_grid_size -= 1
@@ -201,11 +221,12 @@ def main():
         draw_grid(grid, piece, index)
 
     combined_grid = combine_pieces(grid, pieces)
-    print("\nCombined Grid withAll Pieces:")
+    print("\nCombined Grid with All Pieces:")
     print_combined_grid(combined_grid)
     print(len(pieces))
+    print(pieces)
 
-    return pieces, shape
+    return formatted_pieces, shape
 
 if __name__ == "__main__":
-    main()
+    game_generator()
