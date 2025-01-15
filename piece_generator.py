@@ -2,6 +2,7 @@ import random
 from PIL import Image
 from edge_detection import extract_shape
 import numpy as np
+# hello
 
 def generate_random_walk(shape, max_piece_size, start_point):
     """
