@@ -1,4 +1,4 @@
-from Piece_Generator import game_generator
+from piece_generator import game_generator
 
 class TangramSolver:
 
