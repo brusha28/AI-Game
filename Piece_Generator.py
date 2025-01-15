@@ -180,6 +180,7 @@ def main():
         image_path = 'images/image4.jpg'
         img = extract_shape(image_path)
         shape = convert_image_to_coordinates(img, max_grid_size)
+        
         print(shape)
         print("Original Shape:")
         draw_grid(grid, shape, "#")
@@ -203,6 +204,8 @@ def main():
     print("\nCombined Grid withAll Pieces:")
     print_combined_grid(combined_grid)
     print(len(pieces))
+
+    return pieces, shape
 
 if __name__ == "__main__":
     main()
