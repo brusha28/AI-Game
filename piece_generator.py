@@ -195,7 +195,7 @@ def random_rotate_flip_pieces(formatted_pieces):
 
     def flip_piece(piece):
         if random.choice([True, False]):
-            piece = np.flip(piece)
+            piece = np.flip(piece, axis=1)
         return piece
 
     rotated_flipped_pieces = []
@@ -243,4 +243,10 @@ def game_generator():
     return formatted_pieces, shape
 
 if __name__ == "__main__":
-    game_generator()
+    #game_generator()
+    piece = [[0,1,1],
+             [0,1,0],
+             [0,1,0]]
+    print(piece)
+    piece = random_rotate_flip_pieces([piece])
+    print(piece)
