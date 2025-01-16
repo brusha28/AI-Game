@@ -121,7 +121,7 @@ class TangramGame(TangramSolver):
         if self.unused_pieces:
             current_piece_text = NUM_ITERATIONS_FONT.render("Current Piece: ", True, (0, 0, 0))
             current_piece_rect = current_piece_text.get_rect()
-            current_piece_rect.center = (SCREEN_WIDTH / 3, SCREEN_HEIGHT / 1.25)
+            current_piece_rect.center = (SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 1.15)
             SCREEN.blit(current_piece_text, current_piece_rect)
 
         # draw number of iterations if puzzle is solved
