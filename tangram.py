@@ -1,12 +1,10 @@
-from piece_generator import game_generator
+from piece_generator import game_generator, draw_grid
 
 class TangramSolver:
 
     def __init__(self):
         self.generated_pieces, self.generated_shape = game_generator()
         self.pieces = [[], *self.generated_pieces]
-
-        print(self.generated_shape)
 
         self.color_map = (
             "⬛",

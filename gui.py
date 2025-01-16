@@ -50,6 +50,40 @@ class TangramGame(TangramSolver):
                      (BOARD_X_OFFSET, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
                      (BOARD_X_OFFSET + len(self.board[0]) * SQUARE_WIDTH, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
                      LINE_THICKNESS)
+        
+    def draw_dyanmic_board(self):
+        def find_edges(shape):
+            edges = set()
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            for x, y in shape:
+                for dx, dy in directions:
+                    if (x + dx, y + dy) not in shape:
+                        edges.add((x, y))
+                        break
+            return edges
+
+        edges = find_edges(self.generated_shape)
+        for x, y in edges:
+            if (x - 1, y) not in self.generated_shape:
+                pg.draw.line(SCREEN, (0, 0, 0), 
+                        (BOARD_X_OFFSET + y * SQUARE_WIDTH, BOARD_Y_OFFSET + x * SQUARE_HEIGHT), 
+                        (BOARD_X_OFFSET + (y + 1) * SQUARE_WIDTH, BOARD_Y_OFFSET + x * SQUARE_HEIGHT), 
+                        LINE_THICKNESS)
+            if (x + 1, y) not in self.generated_shape:
+                pg.draw.line(SCREEN, (0, 0, 0), 
+                        (BOARD_X_OFFSET + y * SQUARE_WIDTH, BOARD_Y_OFFSET + (x + 1) * SQUARE_HEIGHT), 
+                        (BOARD_X_OFFSET + (y + 1) * SQUARE_WIDTH, BOARD_Y_OFFSET + (x + 1) * SQUARE_HEIGHT), 
+                        LINE_THICKNESS)
+            if (x, y - 1) not in self.generated_shape:
+                pg.draw.line(SCREEN, (0, 0, 0), 
+                        (BOARD_X_OFFSET + y * SQUARE_WIDTH, BOARD_Y_OFFSET + x * SQUARE_HEIGHT), 
+                        (BOARD_X_OFFSET + y * SQUARE_WIDTH, BOARD_Y_OFFSET + (x + 1) * SQUARE_HEIGHT), 
+                        LINE_THICKNESS)
+            if (x, y + 1) not in self.generated_shape:
+                pg.draw.line(SCREEN, (0, 0, 0), 
+                        (BOARD_X_OFFSET + (y + 1) * SQUARE_WIDTH, BOARD_Y_OFFSET + x * SQUARE_HEIGHT), 
+                        (BOARD_X_OFFSET + (y + 1) * SQUARE_WIDTH, BOARD_Y_OFFSET + (x + 1) * SQUARE_HEIGHT), 
+                        LINE_THICKNESS)
 
     @staticmethod
     def draw_title():
@@ -121,7 +155,7 @@ class TangramGame(TangramSolver):
         if self.unused_pieces:
             current_piece_text = NUM_ITERATIONS_FONT.render("Current Piece: ", True, (0, 0, 0))
             current_piece_rect = current_piece_text.get_rect()
-            current_piece_rect.center = (SCREEN_WIDTH / 3, SCREEN_HEIGHT / 1.25)
+            current_piece_rect.center = (SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 1.15)
             SCREEN.blit(current_piece_text, current_piece_rect)
 
         # draw number of iterations if puzzle is solved
@@ -271,7 +305,7 @@ class TangramGame(TangramSolver):
             piece_positions = self.get_piece_positions(self.solution, len(self.pieces) - 1)
             for piece_coord in piece_positions.values():
                 self.draw_piece(piece_coord, self.board, BOARD_X_OFFSET, BOARD_Y_OFFSET)
-                self.draw_board_outline()
+                self.draw_dyanmic_board()
                 pg.display.update()
                 pg.time.wait(250)
             self.unused_pieces = []
@@ -355,7 +389,7 @@ class TangramGame(TangramSolver):
                 if event.type == self.draw_buffer_event:
                     self.draw_buffer()
 
-            self.draw_board_outline()
+            self.draw_dyanmic_board()
 
             pg.display.update()
 

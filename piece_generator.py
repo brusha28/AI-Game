@@ -214,7 +214,7 @@ def game_generator():
 
     while max_grid_size >= min_piece_size:
         grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-        image_path = 'images/image1.jpg'
+        image_path = 'images/image5.png'
         img = extract_shape(image_path)
         shape = convert_image_to_coordinates(img, max_grid_size)
         

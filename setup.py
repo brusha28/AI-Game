@@ -19,7 +19,20 @@ COLOR_MAP = (
     (128, 0, 255),
     (255, 128, 0),
     (128, 0, 0),
-    (128, 128, 0)
+    (128, 128, 0),
+    (0, 0, 0),
+    (213, 186, 182),
+    (0, 255, 255),
+    (0, 0, 255),
+    (255, 0, 255),
+    (255, 255, 0),
+    (128, 128, 128),
+    (255, 0, 0),
+    (0, 255, 0),
+    (45, 170, 45),
+    (128, 0, 255),
+    (255, 128, 0),
+    (128, 0, 0)
 )
 
 TITLE_FONT = pg.font.Font("assets/OstrichSans-Black.otf", 70)
@@ -30,15 +43,15 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-SQUARE_WIDTH = 25
-SQUARE_HEIGHT = 25
+SQUARE_WIDTH = 30
+SQUARE_HEIGHT = 30
 SQUARE_MARGIN = 2
 
-BOARD_X_OFFSET = 95
-BOARD_Y_OFFSET = 100
+BOARD_X_OFFSET = SCREEN_WIDTH // 6
+BOARD_Y_OFFSET = SCREEN_HEIGHT // 7
 
-CURR_PIECE_X_OFFSET = 400
-CURR_PIECE_Y_OFFSET = 540
+CURR_PIECE_X_OFFSET = 480
+CURR_PIECE_Y_OFFSET = 650
 
 LINE_THICKNESS = 5
 
