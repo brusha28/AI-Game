@@ -221,7 +221,7 @@ def game_generator():
         pieces = split_shape_into_pieces(shape, max_piece_size, min_piece_size)
         pieces = merge_single_pieces(pieces)
 
-        if len(pieces) <= 20: #14
+        if len(pieces) <= 14:
             formatted_pieces_test = save_pieces_in_uniform_format(pieces)
             formatted_pieces = random_rotate_flip_pieces(formatted_pieces_test)
             break
