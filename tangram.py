@@ -1,4 +1,4 @@
-from piece_generator import game_generator, draw_grid
+from piece_generator import game_generator
 
 class TangramSolver:
 
@@ -6,24 +6,31 @@ class TangramSolver:
         self.generated_pieces, self.generated_shape = game_generator()
         self.pieces = [[], *self.generated_pieces]
 
-        self.color_map = (
-            "⬛",
-            "⬜",
-            "🟥",
-            "🟧",
-            "🟩",
-            "🟦",
-            "🟪",
-            "🟫",
-            "🧿",
-            "🌕",
-            "👁",
-            "🤢",
-            "😎",
-            "💀"
-        )
+        self.color_map = {
+            -1: (255, 255, 255), # white
+            0: (255, 255, 255),  # white
+            1: (255, 0, 0),      # red
+            2: (255, 165, 0),    # orange
+            3: (0, 255, 0),      # green
+            4: (0, 0, 255),      # blue
+            5: (128, 0, 128),    # purple
+            6: (139, 69, 19),    # brown
+            7: (255, 192, 203),  # pink
+            8: (255, 255, 0),    # yellow
+            9: (0, 255, 255),    # cyan
+            10: (128, 128, 128), # gray
+            11: (0, 128, 0),     # dark green
+            12: (255, 140, 0),   # dark orange
+            13: (139, 0, 0),     # dark red
+            14: (0, 0, 128)      # dark blue
+        }
 
-        self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
+        self.board_size = 17  # Keep max size for array
+        self.board = [[-1 for _ in range(17)] for _ in range(17)]
+        # Set valid positions to 0
+        for x, y in self.generated_shape:
+            self.board[x][y] = 0
+        
         self.piece_positions = self.gen_piece_positions(self.pieces)
 
         self.iterations = 0
@@ -31,12 +38,28 @@ class TangramSolver:
         self.terminate = False
 
     def draw_board(self, board):
+        symbol_map = {    
+            -1: "  ",    
+            0: "  ",
+            1: "■ ",
+            2: "▣ ",
+            3: "▤ ",
+            4: "▴ ",
+            5: "▶ ",
+            6: "▱ ",
+            7: "▷ ",
+            8: "▩ ",
+            9: "▰ ",
+            10: "▢ ",
+            11: "▲ ",
+            12: "▭ ",
+            13: "▮ ",
+            14: "▯ "
+        }
+    
         for row in board:
-            out_row = []
-            for cell in row:
-                out_row.append(self.color_map[cell])
+            out_row = [symbol_map.get(cell, "?") for cell in row]
             print(" ".join(out_row))
-        print()
 
     @staticmethod
     def rotate_piece(piece):
@@ -112,43 +135,48 @@ class TangramSolver:
         return True
 
     def add_piece(self, board, piece, start_row, start_col, check_islands=True):
-        piece_width = len(piece[0])
         piece_height = len(piece)
-        legal_move = True
-        if (start_row + piece_height > len(board)) or (start_col + piece_width > len(board[0])):
-            legal_move = False
-            return board, legal_move
-
-        changed_squares = []
-        for i, row in enumerate(piece):
-            for j, val in enumerate(row):
-                # only add filled spaces, never take away
-                if val:
-                    # don't overwrite existing pieces on the board
-                    if board[start_row + i][start_col + j]:
-                        legal_move = False
-                        return board, legal_move
-                    else:
-                        changed_squares.append((start_row + i, start_col + j, val))
-
-        new_board = [[val for val in row] for row in board]
-        for changed_row, changed_col, val in changed_squares:
-            new_board[changed_row][changed_col] = val
-
-        # check if the move created any illegal islands
+        piece_width = len(piece[0])
+        
+        # Copy board to avoid modifying original
+        new_board = [row[:] for row in board]
+        
+        # Get non-zero positions in piece
+        piece_cells = [(i, j) for i in range(piece_height) 
+                            for j in range(piece_width) 
+                            if piece[i][j] != 0]
+        
+        # Validate piece placement
+        for p_row, p_col in piece_cells:
+            board_row = start_row + p_row
+            board_col = start_col + p_col
+            
+            if (board_row < 0 or board_col < 0 or
+                board_row >= len(board) or
+                board_col >= len(board[0]) or
+                (board_row, board_col) not in self.generated_shape or
+                board[board_row][board_col] != 0):
+                return board, False
+        
+        # Place piece
+        for p_row, p_col in piece_cells:
+            board_row = start_row + p_row
+            board_col = start_col + p_col
+            new_board[board_row][board_col] = piece[p_row][p_col]
+        
         if check_islands and (not self.legal_islands(new_board)):
-            legal_move = False
-            return board, legal_move
-
-        return new_board, legal_move
+            return board, False
+            
+        return new_board, True
 
     def get_legal_squares(self, board, piece, check_islands=True):
         legal_moves = []
         for row in range(len(board)):
             for col in range(len(board[0])):
-                _, legal_move = self.add_piece(board, piece, row, col, check_islands)
-                if legal_move:
-                    legal_moves.append((row, col))
+                if (row, col) in self.generated_shape:
+                    _, legal = self.add_piece(board, piece, row, col, check_islands)
+                    if legal:
+                        legal_moves.append((row, col))
         return legal_moves
 
     def solve_board(self, board, pieces):

@@ -2,7 +2,24 @@ import random
 from PIL import Image
 from edge_detection import extract_shape
 import numpy as np
-# hello
+
+FIGURE_MAP = {
+        0: "  ",
+        1: "■ ",
+        2: "▣ ",
+        3: "▤ ",
+        4: "▴ ",
+        5: "▶ ",
+        6: "▱ ",
+        7: "▷ ",
+        8: "▩ ",
+        9: "▰ ",
+        10: "▢ ",
+        11: "▲ ",
+        12: "▭ ",
+        13: "▮ ",
+        14: "▯ "
+    }
 
 def generate_random_walk(shape, max_piece_size, start_point):
     """
@@ -100,15 +117,16 @@ def draw_grid(grid, shape, piece_number):
     for i, row in enumerate(grid):
         for j, cell in enumerate(row):
             if (i, j) in shape:
-                print(piece_number, end=" ")
+                print(FIGURE_MAP.get(piece_number), end="")
             else:
-                print(".", end=" ")
+                print(FIGURE_MAP.get(0), end="")
         print()
 
 def combine_pieces(grid, pieces):
     """
     Combines all pieces into a single grid.
     """
+    
     combined_grid = [[0] * len(grid[0]) for _ in range(len(grid))]
     for piece_number, piece in enumerate(pieces, start=1):
         for (i, j) in piece:
@@ -119,12 +137,10 @@ def print_combined_grid(grid):
     """
     Prints the combined grid with all pieces.
     """
+    
     for row in grid:
         for cell in row:
-            if cell == 0:
-                print(".", end=" ")
-            else:
-                print(cell, end=" ")
+            print(FIGURE_MAP.get(cell), end="")
         print()
 
 def convert_image_to_coordinates(image, max_grid_size):
@@ -210,11 +226,11 @@ def random_rotate_flip_pieces(formatted_pieces):
 def game_generator():
     max_piece_size = 5  # Maximum size of a Tetris-like piece (+2) Must be 5 or above
     min_piece_size = 3  # Minimum size of a Tetris-like piece  
-    max_grid_size = 20  # Maximum size of square grid
+    max_grid_size = 17  # Maximum size of square grid
 
     while max_grid_size >= min_piece_size:
         grid = [[0] * max_grid_size for _ in range(max_grid_size)]
-        image_path = 'images/image5.png'
+        image_path = 'images/image3.jpg'
         img = extract_shape(image_path)
         shape = convert_image_to_coordinates(img, max_grid_size)
         
@@ -229,7 +245,7 @@ def game_generator():
             max_grid_size -= 1
 
     print("Original Shape:")
-    draw_grid(grid, shape, "#")
+    draw_grid(grid, shape, 1)
 
     print("\nTetris-like Pieces:")
     for index, piece in enumerate(pieces, start=1):
@@ -240,13 +256,9 @@ def game_generator():
     print("\nCombined Grid with All Pieces:")
     print_combined_grid(combined_grid)
 
-    return formatted_pieces, shape
-
-if __name__ == "__main__":
-    #game_generator()
-    piece = [[0,1,1],
-             [0,1,0],
-             [0,1,0]]
-    print(piece)
-    piece = random_rotate_flip_pieces([piece])
-    print(piece)
+    if len(pieces) == len(formatted_pieces):
+        return formatted_pieces, shape
+    else:
+        formatted_pieces_test = save_pieces_in_uniform_format(pieces)
+        formatted_pieces = random_rotate_flip_pieces(formatted_pieces_test)
+        return formatted_pieces, shape

@@ -10,7 +10,7 @@ class TangramGame(TangramSolver):
 
         self.solution = []
 
-        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
+        self.board_buffer = [[0 for _ in range(17)] for _ in range(17)]
 
         self.unused_pieces = [num for num in range(1, len(self.pieces))]
 
@@ -92,30 +92,52 @@ class TangramGame(TangramSolver):
         title_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 15)
         SCREEN.blit(title_word, title_rect)
 
-    @staticmethod
+    @staticmethod 
     def draw_piece(piece_coords, board, x_offset, y_offset):
         for row, col in piece_coords:
-            if board[row][col]:
+            # Only draw pieces in valid positions
+            if board[row][col] > 0:
                 pg.draw.rect(SCREEN, COLOR_MAP[board[row][col]], [SQUARE_WIDTH * col + x_offset,
-                                                                  SQUARE_HEIGHT * row + y_offset,
-                                                                  SQUARE_WIDTH,
-                                                                  SQUARE_HEIGHT])
-
+                                                            SQUARE_HEIGHT * row + y_offset, 
+                                                            SQUARE_WIDTH,
+                                                            SQUARE_HEIGHT])
+                
     def draw_buffer(self):
-        self.board_buffer = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].copy() for _ in range(20)]
+        # Initialize buffer with invalid spaces
+        self.board_buffer = [[-1 for _ in range(17)] for _ in range(17)]
+        for x, y in self.generated_shape:
+            self.board_buffer[x][y] = 0
+                
+        # Get mouse position and convert to grid
         mouse_x, mouse_y = pg.mouse.get_pos()
         row = (mouse_y - BOARD_Y_OFFSET) // SQUARE_HEIGHT
         col = (mouse_x - BOARD_X_OFFSET) // SQUARE_WIDTH
-        if (0 <= row < len(self.board)) and (0 <= col < len(self.board[0])):
-            legal_moves = self.get_legal_squares(self.board, self.current_piece, False)
-
-            if (row, col) in legal_moves:
-                self.board_buffer, _ = self.add_piece(self.board_buffer, self.current_piece, row, col, False)
+        
+        # Show piece preview if mouse in valid position
+        if (row, col) in self.generated_shape:
+            _, legal = self.add_piece(self.board, self.current_piece, row, col, False)
+            if legal:
+                # Add piece preview to buffer
+                for p_row in range(len(self.current_piece)):
+                    for p_col in range(len(self.current_piece[0])):
+                        if self.current_piece[p_row][p_col] != 0:
+                            board_row = row + p_row
+                            board_col = col + p_col
+                            if (board_row, board_col) in self.generated_shape:
+                                self.board_buffer[board_row][board_col] = self.current_piece[p_row][p_col]
+        
+        # Draw buffer to screen
+        self.draw_board_pieces(self.board_buffer, BOARD_X_OFFSET, BOARD_Y_OFFSET)
 
     def draw_board_pieces(self, board, x_offset, y_offset):
         piece_positions = self.get_piece_positions(board, len(self.pieces))
-        for piece_coord in piece_positions.values():
-            self.draw_piece(piece_coord, board, x_offset, y_offset)
+        for piece_num, coords in piece_positions.items():
+            for row, col in coords:
+                pg.draw.rect(SCREEN, self.color_map.get(piece_num, (0,0,0)), 
+                            [SQUARE_WIDTH * col + x_offset,
+                            SQUARE_HEIGHT * row + y_offset, 
+                            SQUARE_WIDTH,
+                            SQUARE_HEIGHT])
 
     @staticmethod
     def draw_fail_state():
@@ -163,7 +185,7 @@ class TangramGame(TangramSolver):
             num_iterations_text = NUM_ITERATIONS_FONT.render(f"Board Positions Searched: {self.iterations:,}", True,
                                                              (0, 0, 0))
             num_iterations_rect = num_iterations_text.get_rect()
-            num_iterations_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.3)
+            num_iterations_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.15)
             SCREEN.blit(num_iterations_text, num_iterations_rect)
 
     #####################################################################
@@ -174,47 +196,61 @@ class TangramGame(TangramSolver):
         piece_loc_dict = {num: [] for num in range(1, num_pieces)}
         for i, row in enumerate(board):
             for j, val in enumerate(row):
-                if val:
+                if val > 0:  # Skip -1 and 0
                     piece_loc_dict[val].append((i, j))
         return piece_loc_dict
 
     @staticmethod
     def clear_piece(piece_val, board):
-        for i, row in enumerate(board):
-            for j, val in enumerate(row):
-                if val == piece_val:
-                    board[i][j] = 0
+        # Create copy to avoid modifying during iteration
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] == piece_val:
+                    board[i][j] = 0  # Reset to empty
 
-    def add_erase_piece(self, row, col):
-        val = self.board[row][col]
-        self.board, legal = self.add_piece(self.board, self.current_piece, row, col, check_islands=False)
-
-        # erase tile unless you're trying to place a piece next to it
-        if val and not legal:
-            self.clear_piece(val, self.board)
-            self.unused_pieces.append(val)
-
-        # place piece if any remain and the move is legal
-        elif self.unused_pieces and legal:
-            to_remove = None
-            for row in self.current_piece:
-                for val in row:
-                    if val:
-                        to_remove = val
-                        break
-            self.unused_pieces.remove(to_remove)
-            if not self.unused_pieces:
-                self.solution = self.board
-                self.current_piece = [[]]
-            else:
+    def add_piece_left_click(self, row, col):
+        # Validate we have pieces to place
+        if not self.unused_pieces or self.piece_idx_pointer >= len(self.unused_pieces):
+            return
+            
+        board = self.board
+        new_board, legal = self.add_piece(board, self.current_piece, row, col)
+        
+        if legal:
+            self.board = new_board
+            # Safely remove piece from unused list
+            if self.piece_idx_pointer < len(self.unused_pieces):
+                self.unused_pieces.remove(self.unused_pieces[self.piece_idx_pointer])
+                
+            # Update current piece
+            if self.unused_pieces:
                 self.current_piece = self.pieces[self.unused_pieces[0]]
-            self.piece_idx_pointer = 0
+                self.piece_idx_pointer = 0
+            else:
+                self.current_piece = [[]]
+                self.piece_idx_pointer = 0
 
-        # special case for when puzzle is solved
-        elif not self.unused_pieces:
-            self.clear_piece(val, self.board)
-            self.unused_pieces.append(val)
-            self.current_piece = self.pieces[self.unused_pieces[0]]
+    def remove_piece_right_click(self, row, col):
+        if (row, col) not in self.generated_shape:
+            return
+            
+        board = self.board
+        val = board[row][col]
+        if val > 0:  # Only remove valid pieces
+            # Add piece back to unused list if not already there
+            if val not in self.unused_pieces:
+                self.unused_pieces.append(val)
+                self.unused_pieces.sort()  # Keep pieces in order
+            
+            # Clear piece from board
+            self.clear_piece(val, board)
+            
+            # Update current piece
+            if self.unused_pieces:
+                self.current_piece = self.pieces[self.unused_pieces[0]]
+                self.piece_idx_pointer = 0
+            else:
+                self.current_piece = [[]]
 
     # need to use dumb way of checking islands since can't guarantee that
     # square is the first piece on the board anymore
@@ -229,7 +265,7 @@ class TangramGame(TangramSolver):
 
     def legal_islands(self, board):
         # use bfs to find number of distinct islands
-        board = [[elem for elem in row] for row in board]
+        board = [[elem if elem != -1 else "#" for elem in row] for row in board]
         board_height = len(board)
         board_width = len(board[0])
         island_cells = []
@@ -273,44 +309,80 @@ class TangramGame(TangramSolver):
         return True
 
     def solve_board(self, board, pieces):
+        # Base case: no more pieces to place
+        if not pieces:
+            # Check if board is completely filled
+            for row in range(len(board)):
+                for col in range(len(board[0])):
+                    if (row, col) in self.generated_shape and board[row][col] == 0:
+                        return False
+            self.solutions.append(board)
+            return True
 
-        self.iterations += 1
+        # Try placing each remaining piece
+        position = pieces[0]
+        for row in range(len(board)):
+            for col in range(len(board[0])):
+                if (row, col) in self.generated_shape and board[row][col] == 0:
+                    new_board, legal = self.add_piece(board, position, row, col)
+                    if legal:
+                        if self.solve_board(new_board, pieces[1:]):
+                            return True
+        return False
 
-        if self.terminate:
-            return
+    def get_piece_variants(self, piece):
+        variants = []
+        current = piece
+        
+        # 4 rotations
+        for _ in range(4):
+            variants.append(current)
+            # Add flipped version
+            variants.append(self.reflect_piece_y(current))
+            current = self.rotate_piece(current)
+        
+        return variants
 
-        # win condition is whole board is covered in pieces
-        if all([all(row) for row in board]):
-            self.draw_board(board)
-            self.terminate = True
-            self.solution = board
-            return
-        else:
-            piece_positions = pieces[0]
-            for position in piece_positions:
-                legal_squares = self.get_legal_squares(board, position)
-                for row, col in legal_squares:
-                    self.solve_board(self.add_piece(board, position, row, col)[0], pieces[1:])
+    def solve_board_with_existing(self, board, pieces):
+        # Base case: no more pieces to place
+        if not pieces:
+            # Check if board is complete
+            for row in range(len(board)):
+                for col in range(len(board[0])):
+                    if (row, col) in self.generated_shape and board[row][col] == 0:
+                        return False
+            self.solutions.append([row[:] for row in board])
+            return True
+
+        # Try all variants of current piece
+        current_piece = pieces[0]
+        variants = self.get_piece_variants(current_piece)
+        
+        # Try each variant at each position
+        for variant in variants:
+            for row in range(len(board)):
+                for col in range(len(board[0])):
+                    if (row, col) in self.generated_shape:
+                        new_board, legal = self.add_piece(board, variant, row, col)
+                        if legal:
+                            if self.solve_board_with_existing(new_board, pieces[1:]):
+                                return True
+        return False
 
     def display_solution(self):
-        unused_pieces = [self.pieces[idx] for idx in self.unused_pieces]
-        unused_pieces = self.gen_piece_positions([0] + unused_pieces)
-
-        self.iterations = 0
-        self.solution = []
+        self.solutions = []
         self.terminate = False
-        self.solve_board(self.board, unused_pieces)
-        if self.solution:
-            self.board = self.solution
-            piece_positions = self.get_piece_positions(self.solution, len(self.pieces) - 1)
-            for piece_coord in piece_positions.values():
-                self.draw_piece(piece_coord, self.board, BOARD_X_OFFSET, BOARD_Y_OFFSET)
-                self.draw_dyanmic_board()
-                pg.display.update()
-                pg.time.wait(250)
+        current_board = [[val for val in row] for row in self.board]
+        unused_pieces = [self.pieces[i] for i in self.unused_pieces]
+        
+        if self.solve_board_with_existing(current_board, unused_pieces):
+            # Update board with solution
+            self.board = self.solutions[0]
+            # Clear unused pieces since solution uses all pieces
             self.unused_pieces = []
+            # Set current piece to empty since no pieces remain
             self.current_piece = [[]]
-
+            self.piece_idx_pointer = 0
         else:
             self.game_state = "failure"
 
@@ -320,7 +392,6 @@ class TangramGame(TangramSolver):
     def play(self):
 
         while True:
-
             # draw background
             SCREEN.blit(pg.transform.scale(BACKGROUND, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, 0))
 
@@ -362,8 +433,10 @@ class TangramGame(TangramSolver):
                     mouse_x, mouse_y = pg.mouse.get_pos()
                     row = (mouse_y - BOARD_Y_OFFSET) // SQUARE_HEIGHT
                     col = (mouse_x - BOARD_X_OFFSET) // SQUARE_WIDTH
-                    if (0 <= row < len(self.board)) and (0 <= col < len(self.board[0])):
-                        self.add_erase_piece(row, col)
+                    if event.button == 1:  # Left click
+                        self.add_piece_left_click(row, col)
+                    elif event.button == 3:  # Right click
+                        self.remove_piece_right_click(row, col)
 
                 if event.type == pg.KEYDOWN and self.unused_pieces:
                     # rotate and flip current piece
