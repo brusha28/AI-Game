@@ -10,7 +10,7 @@ class TangramGame(TangramSolver):
 
         self.solution = []
 
-        self.board_buffer = [[0 for _ in range(17)] for _ in range(17)]
+        self.board_buffer = [[-1 for _ in range(17)] for _ in range(17)]
 
         self.unused_pieces = [num for num in range(1, len(self.pieces))]
 
@@ -101,7 +101,7 @@ class TangramGame(TangramSolver):
                                                             SQUARE_HEIGHT * row + y_offset, 
                                                             SQUARE_WIDTH,
                                                             SQUARE_HEIGHT])
-                
+
     def draw_buffer(self):
         # Initialize buffer with invalid spaces
         self.board_buffer = [[-1 for _ in range(17)] for _ in range(17)]
@@ -113,18 +113,23 @@ class TangramGame(TangramSolver):
         row = (mouse_y - BOARD_Y_OFFSET) // SQUARE_HEIGHT
         col = (mouse_x - BOARD_X_OFFSET) // SQUARE_WIDTH
         
+        # Ensure the mouse position is within the bounds of the current piece
+        piece_height = len(self.current_piece)
+        piece_width = len(self.current_piece[0])
+        row = max(0, min(row, 16 - piece_height + 1))
+        col = max(0, min(col, 16 - piece_width + 1))
+        
         # Show piece preview if mouse in valid position
-        if (row, col) in self.generated_shape:
-            _, legal = self.add_piece(self.board, self.current_piece, row, col, False)
-            if legal:
-                # Add piece preview to buffer
-                for p_row in range(len(self.current_piece)):
-                    for p_col in range(len(self.current_piece[0])):
-                        if self.current_piece[p_row][p_col] != 0:
-                            board_row = row + p_row
-                            board_col = col + p_col
-                            if (board_row, board_col) in self.generated_shape:
-                                self.board_buffer[board_row][board_col] = self.current_piece[p_row][p_col]
+        _, legal = self.add_piece(self.board, self.current_piece, row, col, False)
+        if legal:
+            # Add piece preview to buffer
+            for p_row in range(piece_height):
+                for p_col in range(piece_width):
+                    if self.current_piece[p_row][p_col] != 0:
+                        board_row = row + p_row
+                        board_col = col + p_col
+                        if (board_row, board_col) in self.generated_shape:
+                            self.board_buffer[board_row][board_col] = self.current_piece[p_row][p_col]
         
         # Draw buffer to screen
         self.draw_board_pieces(self.board_buffer, BOARD_X_OFFSET, BOARD_Y_OFFSET)
@@ -149,27 +154,50 @@ class TangramGame(TangramSolver):
         pg.display.update()
 
     def draw_start_state(self):
-        SCREEN.blit(pg.transform.scale(BACKGROUND, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, 0))
-        self.draw_title()
-        instructions_text = NUM_ITERATIONS_FONT.render(f"Cycle through pieces with left", True, (0, 0, 0))
-        instructions_rect = instructions_text.get_rect()
-        instructions_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3)
-        SCREEN.blit(instructions_text, instructions_rect)
+        #SCREEN.blit(pg.transform.scale(BACKGROUND, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, 0))
+        #self.draw_title()
+        #instructions_text = NUM_ITERATIONS_FONT.render(f"Cycle through pieces with left", True, (0, 0, 0))
+        #instructions_rect = instructions_text.get_rect()
+        #instructions_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3)
+        #SCREEN.blit(instructions_text, instructions_rect)
 
-        instructions_text2 = NUM_ITERATIONS_FONT.render(f"and right arrow keys", True, (0, 0, 0))
-        instructions_rect2 = instructions_text2.get_rect()
-        instructions_rect2.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 75)
-        SCREEN.blit(instructions_text2, instructions_rect2)
+        #instructions_text2 = NUM_ITERATIONS_FONT.render(f"and right arrow keys", True, (0, 0, 0))
+        #instructions_rect2 = instructions_text2.get_rect()
+        #instructions_rect2.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 75)
+        #SCREEN.blit(instructions_text2, instructions_rect2)
 
-        instructions_text3 = NUM_ITERATIONS_FONT.render(f"Rotate and flip with R and F", True, (0, 0, 0))
-        instructions_rect3 = instructions_text3.get_rect()
-        instructions_rect3.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 150)
-        SCREEN.blit(instructions_text3, instructions_rect3)
+        #instructions_text3 = NUM_ITERATIONS_FONT.render(f"Rotate and flip with R and F", True, (0, 0, 0))
+        #instructions_rect3 = instructions_text3.get_rect()
+        #instructions_rect3.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 150)
+        #SCREEN.blit(instructions_text3, instructions_rect3)
 
-        instructions_text4 = NUM_ITERATIONS_FONT.render(f"Solve the puzzle with S", True, (0, 0, 0))
-        instructions_rect4 = instructions_text4.get_rect()
-        instructions_rect4.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 225)
-        SCREEN.blit(instructions_text4, instructions_rect4)
+        #instructions_text4 = NUM_ITERATIONS_FONT.render(f"Solve the puzzle with S", True, (0, 0, 0))
+        #instructions_rect4 = instructions_text4.get_rect()
+        #instructions_rect4.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 225)
+        #SCREEN.blit(instructions_text4, instructions_rect4)
+        
+        # Load the instructions image
+        instructions_image = pg.image.load('assets/Block_Puzzle_Instructions.png')
+        
+        # Get the original dimensions of the image
+        image_width, image_height = instructions_image.get_size()
+        
+        # Calculate the scaling factor to maintain aspect ratio
+        scale_factor = min(SCREEN_WIDTH / image_width, SCREEN_HEIGHT / image_height)
+        
+        # Calculate the new dimensions
+        new_width = int(image_width * scale_factor)
+        new_height = int(image_height * scale_factor)
+        
+        # Scale the image to fit the screen while maintaining aspect ratio
+        instructions_image = pg.transform.scale(instructions_image, (new_width, new_height))
+        
+        # Calculate the position to center the image on the screen
+        x_pos = (SCREEN_WIDTH - new_width) // 2
+        y_pos = (SCREEN_HEIGHT - new_height) // 2
+        
+        # Blit the image onto the screen
+        SCREEN.blit(instructions_image, (x_pos, y_pos))
 
         pg.display.update()
 
@@ -180,9 +208,9 @@ class TangramGame(TangramSolver):
             current_piece_rect.center = (SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 1.15)
             SCREEN.blit(current_piece_text, current_piece_rect)
 
-        # draw number of iterations if puzzle is solved
+        # Congratulations if solved
         else:
-            num_iterations_text = NUM_ITERATIONS_FONT.render(f"Board Positions Searched: {self.iterations:,}", True,
+            num_iterations_text = NUM_ITERATIONS_FONT.render(f"Solved! Thanks for playing!", True,
                                                              (0, 0, 0))
             num_iterations_rect = num_iterations_text.get_rect()
             num_iterations_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.15)
@@ -214,8 +242,8 @@ class TangramGame(TangramSolver):
             return
             
         board = self.board
-        new_board, legal = self.add_piece(board, self.current_piece, row, col)
-        
+        new_board, legal = self.add_piece(board, self.current_piece, row, col, False)
+
         if legal:
             self.board = new_board
             # Safely remove piece from unused list

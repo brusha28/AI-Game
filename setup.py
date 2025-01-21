@@ -22,9 +22,9 @@ COLOR_MAP = (
     (128, 128, 0)
 )
 
-TITLE_FONT = pg.font.Font("assets/OstrichSans-Black.otf", 70)
-NUM_ITERATIONS_FONT = pg.font.Font("assets/OstrichSans-Black.otf", 50)
-CURRENT_PIECE_FONT = pg.font.Font("assets/ostrich-regular.ttf", 50)
+TITLE_FONT = pg.font.Font("assets/GomePixel-ARJd7.otf", 70)
+NUM_ITERATIONS_FONT = pg.font.Font("assets/GomePixel-ARJd7.otf", 50)
+CURRENT_PIECE_FONT = pg.font.Font("assets/GomePixel-ARJd7.otf", 50)
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
