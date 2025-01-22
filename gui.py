@@ -1,6 +1,7 @@
 from tangram import TangramSolver
 from setup import *
 import sys
+import time
 
 class TangramGame(TangramSolver):
 
@@ -19,6 +20,10 @@ class TangramGame(TangramSolver):
         self.piece_idx_pointer = 0
 
         self.game_state = "start"
+
+        self.start_time = time.time()
+        self.pieces_placed = 0
+        self.pieces_removed = 0
 
         self.draw_buffer_event = pg.USEREVENT + 1
         pg.time.set_timer(self.draw_buffer_event, 100)
@@ -246,6 +251,8 @@ class TangramGame(TangramSolver):
 
         if legal:
             self.board = new_board
+            self.pieces_placed += 1
+            
             # Safely remove piece from unused list
             if self.piece_idx_pointer < len(self.unused_pieces):
                 self.unused_pieces.remove(self.unused_pieces[self.piece_idx_pointer])
@@ -272,6 +279,7 @@ class TangramGame(TangramSolver):
             
             # Clear piece from board
             self.clear_piece(val, board)
+            self.pieces_removed += 1
             
             # Update current piece
             if self.unused_pieces:
@@ -414,6 +422,12 @@ class TangramGame(TangramSolver):
         else:
             self.game_state = "failure"
 
+    def display_hint(self):
+        elapsed_time = time.time() - self.start_time
+        print(f"Game has been open for {elapsed_time:.2f} seconds.")
+        print(f"Pieces placed: {self.pieces_placed}")
+        print(f"Pieces removed: {self.pieces_removed}")
+
     #####################################################################
     # Main runner method
     #####################################################################
@@ -485,6 +499,10 @@ class TangramGame(TangramSolver):
                     # solve puzzle
                     if event.key == pg.K_s:
                         self.display_solution()
+
+                    # provide hint
+                    if event.key == pg.K_h:
+                        self.display_hint()
 
                 # draw preview of placement of the current tile
                 if event.type == self.draw_buffer_event:
