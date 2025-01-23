@@ -15,7 +15,7 @@ class TangramGame(TangramSolver):
 
         self.unused_pieces = [num for num in range(1, len(self.pieces))]
 
-        self.current_piece = self.pieces[random.choice(self.unused_pieces)]
+        self.current_piece = self.pieces[1]
 
         self.piece_idx_pointer = 0
 
@@ -31,30 +31,6 @@ class TangramGame(TangramSolver):
     #####################################################################
     # Methods for drawing to the screen
     #####################################################################
-    def draw_board_outline(self):
-        # left
-        pg.draw.line(SCREEN, (0, 0, 0),
-                     (BOARD_X_OFFSET, BOARD_Y_OFFSET),
-                     (BOARD_X_OFFSET, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
-                     LINE_THICKNESS)
-
-        # right
-        pg.draw.line(SCREEN, (0, 0, 0),
-                     (BOARD_X_OFFSET + len(self.board[0]) * SQUARE_WIDTH, BOARD_Y_OFFSET),
-                     (BOARD_X_OFFSET + len(self.board[0]) * SQUARE_WIDTH, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
-                     LINE_THICKNESS)
-
-        # top
-        pg.draw.line(SCREEN, (0, 0, 0),
-                     (BOARD_X_OFFSET, BOARD_Y_OFFSET),
-                     (BOARD_X_OFFSET + len(self.board[0]) * SQUARE_WIDTH, BOARD_Y_OFFSET),
-                     LINE_THICKNESS)
-
-        # bottom
-        pg.draw.line(SCREEN, (0, 0, 0),
-                     (BOARD_X_OFFSET, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
-                     (BOARD_X_OFFSET + len(self.board[0]) * SQUARE_WIDTH, BOARD_Y_OFFSET + len(self.board) * SQUARE_HEIGHT),
-                     LINE_THICKNESS)
         
     def draw_dyanmic_board(self):
         def find_edges(shape):
@@ -107,7 +83,7 @@ class TangramGame(TangramSolver):
                                                             SQUARE_WIDTH,
                                                             SQUARE_HEIGHT])
 
-    def draw_buffer(self):
+    def draw_buffer(self, check = False):
         # Initialize buffer with invalid spaces
         self.board_buffer = [[-1 for _ in range(17)] for _ in range(17)]
         for x, y in self.generated_shape:
@@ -117,6 +93,8 @@ class TangramGame(TangramSolver):
         mouse_x, mouse_y = pg.mouse.get_pos()
         row = (mouse_y - BOARD_Y_OFFSET) // SQUARE_HEIGHT
         col = (mouse_x - BOARD_X_OFFSET) // SQUARE_WIDTH
+        if check:
+            print(row, col)
         
         # Ensure the mouse position is within the bounds of the current piece
         piece_height = len(self.current_piece)
@@ -158,29 +136,7 @@ class TangramGame(TangramSolver):
         SCREEN.blit(num_iterations_text, num_iterations_rect)
         pg.display.update()
 
-    def draw_start_state(self):
-        #SCREEN.blit(pg.transform.scale(BACKGROUND, (SCREEN_WIDTH, SCREEN_HEIGHT)), (0, 0))
-        #self.draw_title()
-        #instructions_text = NUM_ITERATIONS_FONT.render(f"Cycle through pieces with left", True, (0, 0, 0))
-        #instructions_rect = instructions_text.get_rect()
-        #instructions_rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3)
-        #SCREEN.blit(instructions_text, instructions_rect)
-
-        #instructions_text2 = NUM_ITERATIONS_FONT.render(f"and right arrow keys", True, (0, 0, 0))
-        #instructions_rect2 = instructions_text2.get_rect()
-        #instructions_rect2.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 75)
-        #SCREEN.blit(instructions_text2, instructions_rect2)
-
-        #instructions_text3 = NUM_ITERATIONS_FONT.render(f"Rotate and flip with R and F", True, (0, 0, 0))
-        #instructions_rect3 = instructions_text3.get_rect()
-        #instructions_rect3.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 150)
-        #SCREEN.blit(instructions_text3, instructions_rect3)
-
-        #instructions_text4 = NUM_ITERATIONS_FONT.render(f"Solve the puzzle with S", True, (0, 0, 0))
-        #instructions_rect4 = instructions_text4.get_rect()
-        #instructions_rect4.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 + 225)
-        #SCREEN.blit(instructions_text4, instructions_rect4)
-        
+    def draw_start_state(self):        
         # Load the instructions image
         instructions_image = pg.image.load('assets/Block_Puzzle_Instructions.png')
         
@@ -288,8 +244,6 @@ class TangramGame(TangramSolver):
             else:
                 self.current_piece = [[]]
 
-    # need to use dumb way of checking islands since can't guarantee that
-    # square is the first piece on the board anymore
     @staticmethod
     def check_square(points):
         x_vals = [tup[0] for tup in points]
@@ -344,82 +298,104 @@ class TangramGame(TangramSolver):
                     island_cells = []
         return True
 
-    def solve_board(self, board, pieces):
-        # Base case: no more pieces to place
-        if not pieces:
-            # Check if board is completely filled
-            for row in range(len(board)):
-                for col in range(len(board[0])):
-                    if (row, col) in self.generated_shape and board[row][col] == 0:
-                        return False
-            self.solutions.append(board)
-            return True
-
-        # Try placing each remaining piece
-        position = pieces[0]
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                if (row, col) in self.generated_shape and board[row][col] == 0:
-                    new_board, legal = self.add_piece(board, position, row, col)
-                    if legal:
-                        if self.solve_board(new_board, pieces[1:]):
-                            return True
-        return False
-
     def get_piece_variants(self, piece):
+        """
+        Generate all possible orientations of a piece (rotations and flips).
+        Returns list of piece matrices.
+        """
         variants = []
-        current = piece
-        
-        # 4 rotations
+        current = [row[:] for row in piece]  # Deep copy
+
+        # Generate 4 rotations
         for _ in range(4):
-            variants.append(current)
+            # Add current rotation
+            variants.append([row[:] for row in current])
+            
             # Add flipped version
-            variants.append(self.reflect_piece_y(current))
-            current = self.rotate_piece(current)
+            flipped = [row[::-1] for row in current]
+            variants.append([row[:] for row in flipped])
+            
+            # Rotate 90 degrees for next iteration
+            # Rotate by transposing and reversing rows
+            current = list(zip(*current[::-1]))
+            current = [[cell for cell in row] for row in current]
         
-        return variants
+        # Remove duplicates by converting to tuples for comparison
+        unique_variants = []
+        seen = set()
+        
+        for variant in variants:
+            variant_tuple = tuple(tuple(row) for row in variant)
+            if variant_tuple not in seen:
+                seen.add(variant_tuple)
+                unique_variants.append(variant)
+        
+        return unique_variants
 
     def solve_board_with_existing(self, board, pieces):
-        # Base case: no more pieces to place
+        # Base case: check if board is complete
         if not pieces:
-            # Check if board is complete
+            empty_exists = False
             for row in range(len(board)):
                 for col in range(len(board[0])):
                     if (row, col) in self.generated_shape and board[row][col] == 0:
-                        return False
-            self.solutions.append([row[:] for row in board])
-            return True
+                        empty_exists = True
+                        break
+            if not empty_exists:
+                self.solutions.append([row[:] for row in board])
+                return True
+            return False
 
-        # Try all variants of current piece
         current_piece = pieces[0]
+        remaining_pieces = pieces[1:]
         variants = self.get_piece_variants(current_piece)
         
-        # Try each variant at each position
-        for variant in variants:
+        print(f"\nTrying {len(pieces)} pieces")
+        for variant_idx, variant in enumerate(variants):
+            print(f"\nVariant {variant_idx + 1}:")
+            for row in variant:
+                print("".join(['■' if cell else ' ' for cell in row]))
+            
+            # Try all valid board positions
             for row in range(len(board)):
                 for col in range(len(board[0])):
-                    if (row, col) in self.generated_shape:
-                        new_board, legal = self.add_piece(board, variant, row, col)
+                    # Check if any valid position exists at this location
+                    valid_pos = False
+                    for p_row in range(len(variant)):
+                        for p_col in range(len(variant[0])):
+                            check_row = row + p_row
+                            check_col = col + p_col
+                            if (check_row, check_col) in self.generated_shape:
+                                valid_pos = True
+                                break
+                        if valid_pos:
+                            break
+                    
+                    if valid_pos:
+                        new_board, legal = self.add_piece(board, variant, row, col, False)
                         if legal:
-                            if self.solve_board_with_existing(new_board, pieces[1:]):
+                            print(f"Legal move found at ({row}, {col})")
+                            if self.solve_board_with_existing(new_board, remaining_pieces):
                                 return True
+                            else:
+                                print(f"Invalid move at ({row}, {col})")
         return False
 
     def display_solution(self):
+        print("\n=== Starting Solver ===")
         self.solutions = []
         self.terminate = False
         current_board = [[val for val in row] for row in self.board]
         unused_pieces = [self.pieces[i] for i in self.unused_pieces]
         
         if self.solve_board_with_existing(current_board, unused_pieces):
-            # Update board with solution
+            print("\nSolution found!")
             self.board = self.solutions[0]
-            # Clear unused pieces since solution uses all pieces
             self.unused_pieces = []
-            # Set current piece to empty since no pieces remain
             self.current_piece = [[]]
             self.piece_idx_pointer = 0
         else:
+            print("\nNo solution found.")
             self.game_state = "failure"
 
     def display_hint(self):
@@ -503,6 +479,9 @@ class TangramGame(TangramSolver):
                     # provide hint
                     if event.key == pg.K_h:
                         self.display_hint()
+
+                    if event.key == pg.K_c:
+                        self.draw_buffer(True)
 
                 # draw preview of placement of the current tile
                 if event.type == self.draw_buffer_event:
